@@ -10,6 +10,10 @@ type urlRepositoryImp struct {
 	DB *sql.DB
 }
 
+func NewUrlRepository(DB *sql.DB) UrlRepository {
+	return &urlRepositoryImp{DB: DB}
+}
+
 func (repository *urlRepositoryImp) save(ctx context.Context, url domain.URL) (domain.URL, error) {
 	script := "INSERT INTO urls (code,long_url,hit_count) VALUES ?,?,?"
 	result, err := repository.DB.ExecContext(ctx, script, url.Code, url.LongURL, url.HitCount)
