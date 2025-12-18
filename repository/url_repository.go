@@ -6,5 +6,5 @@ import (
 )
 
 type UrlRepository interface {
-	save(ctx context.Context, url domain.URL) (domain.URL, error)
+	Save(ctx context.Context, url domain.URL) (domain.URL, error)
 }
