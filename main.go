@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"shortly/app"
+	"shortly/repository"
+	"shortly/service"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -27,10 +29,10 @@ func main() {
 	fmt.Println("dsn:", userDB, passDB, hostDB, portDB, nameDB)
 
 	//setDB
-	db, err := app.NewDB(userDB, passDB, hostDB, portDB, nameDB)
-	if err != nil {
-		log.Fatal(err)
-	}
+	db := app.NewDB(userDB, passDB, hostDB, portDB, nameDB)
+
+	urlRepository := repository.NewUrlRepository(db)
+	urlService := service.NewUrlService(urlRepository)
 
 	r := mux.NewRouter()
 	log.Fatal(http.ListenAndServe(":8080", r))
