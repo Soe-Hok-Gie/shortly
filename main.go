@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"shortly/app"
+	"shortly/controller"
 	"shortly/repository"
 	"shortly/service"
 
@@ -33,6 +34,7 @@ func main() {
 
 	urlRepository := repository.NewUrlRepository(db)
 	urlService := service.NewUrlService(urlRepository)
+	urlController := controller.NewUrlController(urlService)
 
 	r := mux.NewRouter()
 	log.Fatal(http.ListenAndServe(":8080", r))
