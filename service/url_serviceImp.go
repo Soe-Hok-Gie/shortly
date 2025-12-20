@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"shortly/model/domain"
 	"shortly/repository"
@@ -27,17 +28,21 @@ func (service *urlServiceImp) Save(ctx context.Context, longURL string) (domain.
 		HitCount: 0,
 	}
 
-	return service.UrlRepository.Save(ctx, url)
+	url, err := service.UrlRepository.Save(ctx, url)
+	if err != nil {
+		return domain.URL{}, fmt.Errorf("failed to save URL: %w", err)
+	}
+	return url, nil
 
 }
 
 func generateShortCode(length int) string {
-	const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	const char = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 	result := make([]byte, length)
 
 	for i := 0; i < length; i++ {
-		result[i] = chars[rand.Intn(len(chars))]
+		result[i] = char[rand.Intn(len(char))]
 	}
 
 	return string(result)
