@@ -10,6 +10,7 @@ import (
 	"shortly/repository"
 	"shortly/service"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
@@ -37,6 +38,7 @@ func main() {
 	urlController := controller.NewUrlController(urlService)
 
 	r := mux.NewRouter()
+	r.HandleFunc("/url", urlController.Save).Methods("Post")
 	log.Fatal(http.ListenAndServe(":8080", r))
 
 }
