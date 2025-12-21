@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
+	"shortly/model/dto"
 	"shortly/service"
 )
 
@@ -16,4 +18,71 @@ func NewUrlController(urlService service.UrlService) UrlController {
 
 func (controller *urlControllerImp) Save(writer http.ResponseWriter, request *http.Request) {
 
+	// ctx := request.Context()
+
+	// var req dto.CreateURLRequest
+	// if err := json.NewDecoder(request.Body).Decode(&req); err != nil {
+	// 	http.Error(writer, "invalid request body", http.StatusBadRequest)
+	// 	return
+	// }
+
+	// if req.LongURL == "" {
+	// 	http.Error(writer, "long_url is required", http.StatusBadRequest)
+	// 	return
+	// }
+
+	// // panggil service
+	// url, err := controller.urlService.Save(ctx, req.LongURL)
+	// if err != nil {
+	// 	http.Error(writer, "failed to save url", http.StatusInternalServerError)
+	// 	return
+	// }
+	// // mapping domain → DTO
+	// resp := dto.CreateURLResponse{
+	// 	Code:     url.Code,
+	// 	ShortURL: "https://sho.rt/" + url.Code,
+	// }
+	// // return JSON
+	// writer.Header().Set("Content-Type", "application/json")
+	// writer.WriteHeader(http.StatusCreated)
+	// json.NewEncoder(writer).Encode(resp)
+
+	ctx := request.Context()
+
+	var req dto.CreateURLRequest
+	if err := json.NewDecoder(request.Body).Decode(&req); err != nil {
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(writer).Encode(dto.Response{
+			Code:   http.StatusBadRequest,
+			Status: "Bad Request",
+			Data:   "invalid request",
+		})
+		return
+	}
+
+	url, err := controller.urlService.Save(ctx, req.LongURL)
+	if err != nil {
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(writer).Encode(dto.Response{
+			Code:   http.StatusInternalServerError,
+			Status: "Internal Server Error",
+			Data:   nil,
+		})
+		return
+	}
+
+	response := dto.CreateURLResponse{
+		Code:     url.Code,
+		ShortURL: "http://localhost:8080/" + url.Code,
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusCreated)
+	json.NewEncoder(writer).Encode(dto.Response{
+		Code:   http.StatusCreated,
+		Status: "Created",
+		Data:   response,
+	})
 }
