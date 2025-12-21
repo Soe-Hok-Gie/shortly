@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"shortly/model/domain"
 	"shortly/repository"
-	"time"
 )
 
 type urlServiceImp struct {
@@ -17,9 +16,10 @@ func NewUrlService(urlRepository repository.UrlRepository) UrlService {
 	return &urlServiceImp{UrlRepository: urlRepository}
 }
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
+// rand package digunakan untuk generate angka random
+// Jika tidak set seed, Go akan selalu generate urutan angka yang sama setiap kali program dijalankan.
+// rand.Seed() memberi nilai awal (seed) untuk generator random, supaya hasilnya berbeda setiap kali program dijalankan.
+// Diletakkan di init() → otomatis dijalankan sebelum main()
 
 func (service *urlServiceImp) Save(ctx context.Context, longURL string) (domain.URL, error) {
 	url := domain.URL{
@@ -42,7 +42,7 @@ func generateShortCode(length int) string {
 	result := make([]byte, length)
 
 	for i := 0; i < length; i++ {
-		result[i] = char[rand.Intn(len(char))]
+		result[i] = char[rand.Intn(len(char))] //pilih indeks random dari 0 sampai len(char)-1
 	}
 
 	return string(result)
