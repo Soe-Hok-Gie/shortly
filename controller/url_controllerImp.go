@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"shortly/model/dto"
 	"shortly/service"
+
+	"github.com/gorilla/mux"
 )
 
 type urlControllerImp struct {
@@ -85,4 +87,17 @@ func (controller *urlControllerImp) Save(writer http.ResponseWriter, request *ht
 		Status: "Created",
 		Data:   response,
 	})
+}
+
+func (controller *urlControllerImp) Redirect(writer http.ResponseWriter, request *http.Request) {
+	ctx := request.Context()
+	code := mux.Vars(request)["code"]
+
+	url, err := controller.urlService.Redirect(ctx, code)
+	if err != nil {
+		http.NotFound(writer, request)
+		return
+	}
+	http.Redirect(writer, request, url.LongURL, http.StatusFound)
+
 }
