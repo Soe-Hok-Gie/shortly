@@ -31,16 +31,15 @@ func (repository *urlRepositoryImp) Save(ctx context.Context, url domain.URL) (d
 	return url, nil
 }
 
-func (repository *urlRepositoryImp) FindByShortCode(ctx context.Context, code string) (domain.URL, error) {
+func (repository *urlRepositoryImp) Redirect(ctx context.Context, code string) (domain.URL, error) {
 	script := "SELECT id, code,long_url from urls WHERE code =?"
 	row := repository.DB.QueryRowContext(ctx, script, code)
 
 	var url domain.URL
 	err := row.Scan(
-		url.Id,
-		url.Code,
-		url.LongURL,
-		url.HitCount,
+		&url.Id,
+		&url.Code,
+		&url.LongURL,
 	)
 	if err != nil {
 		fmt.Println("err", err)
