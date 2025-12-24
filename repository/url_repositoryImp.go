@@ -59,8 +59,8 @@ func (repository *urlRepositoryImp) GetAndIncrementHits(ctx context.Context, cod
 		return url, err
 	}
 
-	script2 := "UPDATE urls set hit_count=hit_count + 1 WHERE code = ?"
-	if _, err := repository.DB.ExecContext(ctx, script2, code); err != nil {
+	hitscript := "UPDATE urls set hit_count=hit_count + 1 WHERE code = ?"
+	if _, err := repository.DB.ExecContext(ctx, hitscript, code); err != nil {
 		return url, err
 	}
 
