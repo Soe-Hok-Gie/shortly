@@ -31,19 +31,41 @@ func (repository *urlRepositoryImp) Save(ctx context.Context, url domain.URL) (d
 	return url, nil
 }
 
-func (repository *urlRepositoryImp) Redirect(ctx context.Context, code string) (domain.URL, error) {
-	script := "SELECT id, code,long_url from urls WHERE code =?"
+// func (repository *urlRepositoryImp) Redirect(ctx context.Context, code string) (domain.URL, error) {
+// 	script := "SELECT id, code,long_url from urls WHERE code =?"
+// 	row := repository.DB.QueryRowContext(ctx, script, code)
+
+// 	var url domain.URL
+// 	err := row.Scan(
+// 		&url.Id,
+// 		&url.Code,
+// 		&url.LongURL,
+// 	)
+// 	if err != nil {
+// 		fmt.Println("err", err)
+// 		return url, err
+// 	}
+// 	return url, nil
+// }
+
+func (repository *urlRepositoryImp) GetAndIncrementHits(ctx context.Context, code string) (domain.URL, error) {
+
+	script := "SELECT id, code, long_url, hit_count FROM urls WHERE code = ?"
 	row := repository.DB.QueryRowContext(ctx, script, code)
 
 	var url domain.URL
-	err := row.Scan(
-		&url.Id,
-		&url.Code,
-		&url.LongURL,
-	)
+	err := row.Scan(&url.Id, &url.Code, &url.LongURL, &url.HitCount)
 	if err != nil {
-		fmt.Println("err", err)
 		return url, err
 	}
+
+	script2 := "UPDATE urls set hit_count=hit_count + 1 WHERE code = ?"
+	if _, err := repository.DB.ExecContext(ctx, script2, code); err != nil {
+		return url, err
+	}
+
+	url.HitCount++
+
 	return url, nil
+
 }
