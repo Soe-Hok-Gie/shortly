@@ -38,7 +38,8 @@ func main() {
 	urlController := controller.NewUrlController(urlService)
 
 	r := mux.NewRouter()
-	r.HandleFunc("/url", urlController.Save).Methods("Post")
+	r.HandleFunc("/url", urlController.Save).Methods("POST")
+	r.HandleFunc("/{code}", urlController.RedirectAndIncrement).Methods("GET")
 	log.Fatal(http.ListenAndServe(":8080", r))
 
 }
