@@ -48,11 +48,24 @@ func generateShortCode(length int) string {
 	return string(result)
 }
 
-func (service *urlServiceImp) Redirect(ctx context.Context, code string) (domain.URL, error) {
-	// return service.UrlRepository.Redirect(ctx, code)
-	url, err := service.UrlRepository.Redirect(ctx, code)
+// func (service *urlServiceImp) Redirect(ctx context.Context, code string) (domain.URL, error) {
+// 	// return service.UrlRepository.Redirect(ctx, code)
+// 	url, err := service.UrlRepository.Redirect(ctx, code)
+// 	if err != nil {
+// 		return url, fmt.Errorf("failed url: %w", err)
+// 	}
+// 	return url, nil
+// }
+
+func (service *urlServiceImp) RedirectAndIncrement(ctx context.Context, code string) (domain.URL, error) {
+
+	url, err := service.UrlRepository.GetAndIncrementHits(ctx, code)
+
 	if err != nil {
 		return url, fmt.Errorf("failed url: %w", err)
 	}
+
+	url.HitCount++
+
 	return url, nil
 }
