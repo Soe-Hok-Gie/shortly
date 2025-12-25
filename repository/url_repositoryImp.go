@@ -64,8 +64,6 @@ func (repository *urlRepositoryImp) GetAndIncrementHits(ctx context.Context, cod
 		return url, err
 	}
 
-	url.HitCount++
-
 	return url, nil
 
 }
