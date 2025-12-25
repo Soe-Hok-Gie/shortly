@@ -110,7 +110,10 @@ func (controller *urlControllerImp) RedirectAndIncrement(writer http.ResponseWri
 
 	url, err := controller.urlService.RedirectAndIncrement(ctx, code)
 	if err != nil {
-		http.NotFound(writer, request)
+		log.Println("Redirect error:", err)
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(writer).Encode(map[string]string{"error": "URL not found"})
 		return
 	}
 
