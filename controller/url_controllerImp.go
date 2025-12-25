@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"shortly/model/dto"
 	"shortly/service"
@@ -89,15 +90,35 @@ func (controller *urlControllerImp) Save(writer http.ResponseWriter, request *ht
 	})
 }
 
-func (controller *urlControllerImp) Redirect(writer http.ResponseWriter, request *http.Request) {
+// func (controller *urlControllerImp) Redirect(writer http.ResponseWriter, request *http.Request) {
+// 	ctx := request.Context()
+// 	code := mux.Vars(request)["code"]
+
+// 	url, err := controller.urlService.Redirect(ctx, code)
+// 	if err != nil {
+// 		http.NotFound(writer, request)
+// 		return
+// 	}
+// 	http.Redirect(writer, request, url.LongURL, http.StatusFound)
+
+// }
+
+func (controller *urlControllerImp) RedirectAndIncrement(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 	code := mux.Vars(request)["code"]
+	log.Println("Route hit, code =", mux.Vars(request)["code"])
 
-	url, err := controller.urlService.Redirect(ctx, code)
+	url, err := controller.urlService.RedirectAndIncrement(ctx, code)
 	if err != nil {
 		http.NotFound(writer, request)
 		return
 	}
-	http.Redirect(writer, request, url.LongURL, http.StatusFound)
 
+	// http.Redirect(writer, request, url.LongURL, http.StatusFound)
+
+	// log.Println("Redirecting to:", url.LongURL, "Hits now:", url.HitCount)
+	// Kembalikan JSON
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
+	json.NewEncoder(writer).Encode(url)
 }
