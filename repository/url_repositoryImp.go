@@ -77,4 +77,13 @@ func (repository *urlRepositoryImp) FindTopVisited(ctx context.Context) ([]*doma
 	}
 	defer rows.Close()
 
+	var result []*domain.URL
+	for rows.Next() {
+		var url domain.URL
+		if err := rows.Scan(&url.Code, &url.LongURL, &url.HitCount); err != nil {
+			return nil, err
+		}
+		result = append(result, &url)
+	}
+	return result, nil
 }
