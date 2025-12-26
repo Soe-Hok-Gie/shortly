@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"shortly/model/domain"
+	"shortly/model/dto"
 	"shortly/repository"
 )
 
@@ -68,4 +69,12 @@ func (service *urlServiceImp) RedirectAndIncrement(ctx context.Context, code str
 	url.HitCount++
 
 	return url, nil
+}
+
+func (service *urlServiceImp) FindTopVisited(ctx context.Context) ([]*dto.TopLinkResponse, error) {
+	url, err := service.UrlRepository.FindTopVisited(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 }
