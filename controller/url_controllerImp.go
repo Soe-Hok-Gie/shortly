@@ -125,3 +125,7 @@ func (controller *urlControllerImp) RedirectAndIncrement(writer http.ResponseWri
 	writer.WriteHeader(http.StatusOK)
 	json.NewEncoder(writer).Encode(url)
 }
+
+func (controller *urlControllerImp) FindTopVisited(writer http.ResponseWriter, request *http.Request) {
+
+}
