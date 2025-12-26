@@ -67,3 +67,7 @@ func (repository *urlRepositoryImp) GetAndIncrementHits(ctx context.Context, cod
 	return url, nil
 
 }
+
+func (repository *urlRepositoryImp) FindTopVisited(ctx context.Context) ([]*domain.URL, error) {
+
+}
