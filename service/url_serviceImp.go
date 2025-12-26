@@ -77,4 +77,14 @@ func (service *urlServiceImp) FindTopVisited(ctx context.Context) ([]*dto.TopLin
 		return nil, err
 	}
 
+	result := []*dto.TopLinkResponse{}
+	for _, url := range url {
+		result = append(result, &dto.TopLinkResponse{
+			Code: url.Code,
+			// ShortURL: url.ShortURL,
+			LongURL:  url.LongURL,
+			HitCount: url.HitCount,
+		})
+	}
+	return result, nil
 }
