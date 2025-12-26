@@ -69,5 +69,12 @@ func (repository *urlRepositoryImp) GetAndIncrementHits(ctx context.Context, cod
 }
 
 func (repository *urlRepositoryImp) FindTopVisited(ctx context.Context) ([]*domain.URL, error) {
+	script := "SELECT code, long_url, hit_count FROM urls ORDER BY hit_count DESC LIMIT 10"
+	rows, err := repository.DB.QueryContext(ctx, script)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
 }
