@@ -39,7 +39,9 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/url", urlController.Save).Methods("POST")
+	r.HandleFunc("/topvisited", urlController.GetTopVisited).Methods("GET")
 	r.HandleFunc("/{code}", urlController.RedirectAndIncrement).Methods("GET")
+
 	log.Fatal(http.ListenAndServe(":8080", r))
 
 }
