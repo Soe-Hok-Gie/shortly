@@ -68,7 +68,7 @@ func (repository *urlRepositoryImp) GetAndIncrementHits(ctx context.Context, cod
 
 }
 
-func (repository *urlRepositoryImp) FindTopVisited(ctx context.Context) ([]*domain.URL, error) {
+func (repository *urlRepositoryImp) GetTopVisited(ctx context.Context) ([]*domain.URL, error) {
 	script := "SELECT code, long_url, hit_count FROM urls ORDER BY hit_count DESC LIMIT 10"
 	rows, err := repository.DB.QueryContext(ctx, script)
 
@@ -79,11 +79,12 @@ func (repository *urlRepositoryImp) FindTopVisited(ctx context.Context) ([]*doma
 
 	var result []*domain.URL
 	for rows.Next() {
-		var url domain.URL
+		//buat var baru dalam loop untuk mencegah Bug Pointer Reuse / Loop Variable Capture
+		url := new(domain.URL)
 		if err := rows.Scan(&url.Code, &url.LongURL, &url.HitCount); err != nil {
 			return nil, err
 		}
-		result = append(result, &url)
+		result = append(result, url)
 	}
 	return result, nil
 }
