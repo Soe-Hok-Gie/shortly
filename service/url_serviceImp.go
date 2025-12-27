@@ -71,19 +71,18 @@ func (service *urlServiceImp) RedirectAndIncrement(ctx context.Context, code str
 	return url, nil
 }
 
-func (service *urlServiceImp) FindTopVisited(ctx context.Context) ([]*dto.TopLinkResponse, error) {
-	url, err := service.UrlRepository.FindTopVisited(ctx)
+func (service *urlServiceImp) GetTopVisited(ctx context.Context) ([]*dto.TopLinkResponse, error) {
+	url, err := service.UrlRepository.GetTopVisited(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	result := []*dto.TopLinkResponse{}
-	for _, url := range url {
+	for _, u := range url {
 		result = append(result, &dto.TopLinkResponse{
-			Code: url.Code,
-			// ShortURL: url.ShortURL,
-			LongURL:  url.LongURL,
-			HitCount: url.HitCount,
+			Code:     u.Code,
+			LongURL:  u.LongURL,
+			HitCount: u.HitCount,
 		})
 	}
 	return result, nil
