@@ -49,6 +49,10 @@ func (repository *urlRepositoryImp) Save(ctx context.Context, url domain.URL) (d
 // }
 
 func (repository *urlRepositoryImp) GetAndIncrementHits(ctx context.Context, code string) (domain.URL, error) {
+	hitscript := "UPDATE urls set hit_count=hit_count + 1 WHERE code = ?"
+	if _, err := repository.DB.ExecContext(ctx, hitscript, code); err != nil {
+		return domain.URL{}, err
+	}
 
 	script := "SELECT id, code, long_url, hit_count FROM urls WHERE code = ?"
 	row := repository.DB.QueryRowContext(ctx, script, code)
@@ -56,11 +60,6 @@ func (repository *urlRepositoryImp) GetAndIncrementHits(ctx context.Context, cod
 	var url domain.URL
 	err := row.Scan(&url.Id, &url.Code, &url.LongURL, &url.HitCount)
 	if err != nil {
-		return url, err
-	}
-
-	hitscript := "UPDATE urls set hit_count=hit_count + 1 WHERE code = ?"
-	if _, err := repository.DB.ExecContext(ctx, hitscript, code); err != nil {
 		return url, err
 	}
 
