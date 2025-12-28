@@ -31,23 +31,6 @@ func (repository *urlRepositoryImp) Save(ctx context.Context, url domain.URL) (d
 	return url, nil
 }
 
-// func (repository *urlRepositoryImp) Redirect(ctx context.Context, code string) (domain.URL, error) {
-// 	script := "SELECT id, code,long_url from urls WHERE code =?"
-// 	row := repository.DB.QueryRowContext(ctx, script, code)
-
-// 	var url domain.URL
-// 	err := row.Scan(
-// 		&url.Id,
-// 		&url.Code,
-// 		&url.LongURL,
-// 	)
-// 	if err != nil {
-// 		fmt.Println("err", err)
-// 		return url, err
-// 	}
-// 	return url, nil
-// }
-
 func (repository *urlRepositoryImp) GetAndIncrementHits(ctx context.Context, code string) (domain.URL, error) {
 	hitscript := "UPDATE urls set hit_count=hit_count + 1 WHERE code = ?"
 	if _, err := repository.DB.ExecContext(ctx, hitscript, code); err != nil {
