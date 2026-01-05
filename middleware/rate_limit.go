@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"encoding/json"
 	"net/http"
 	"sync"
 	"time"
@@ -33,34 +34,34 @@ func (middleware *RateLimitMiddleware) WithRateLimit() func(http.Handler) http.H
 				userID = request.RemoteAddr
 			}
 
-			// Lock sebelum akses map
-			// middleware.Mutex.Lock()
-			// defer middleware.Mutex.Unlock() // 🔑 Pakai defer untuk safety
+			//Lock sebelum akses map
+			middleware.Mutex.Lock()
+			defer middleware.Mutex.Unlock() // 🔑 Pakai defer untuk safety
 
-			// now := time.Now()
-			// data, exists := middleware.RateLimitMap[userID]
+			now := time.Now()
+			data, exists := middleware.RateLimitMap[userID]
 
-			// if !exists || (now.Sub(data.FirstHit) > time.Minute && data.Action == request.URL.Path) {
-			// 	//window baru
-			// 	middleware.RateLimitMap[userID] = &RateLimitData{
-			// 		HitCount: 1,
-			// 		FirstHit: now,
-			// 		Action:   request.URL.Path,
-			// 	}
-			// } else {
-			// 	data.HitCount++
-			// 	if data.HitCount > 10 && data.Action == request.URL.Path {
-			// 		writer.Header().Set("Content-Type", "application/json")
-			// 		writer.WriteHeader(http.StatusTooManyRequests)
-			// 		json.NewEncoder(writer).Encode(map[string]interface{}{
-			// 			"code":   http.StatusTooManyRequests,
-			// 			"status": "Too Many Requests",
-			// 			"data":   "Rate limit exceeded",
-			// 		})
-			// 		return
+			if !exists || (now.Sub(data.FirstHit) > time.Minute && data.Action == request.URL.Path) {
+				//window baru
+				middleware.RateLimitMap[userID] = &RateLimitData{
+					HitCount: 1,
+					FirstHit: now,
+					Action:   request.URL.Path,
+				}
+			} else {
+				data.HitCount++
+				if data.HitCount > 10 && data.Action == request.URL.Path {
+					writer.Header().Set("Content-Type", "application/json")
+					writer.WriteHeader(http.StatusTooManyRequests)
+					json.NewEncoder(writer).Encode(map[string]interface{}{
+						"code":   http.StatusTooManyRequests,
+						"status": "Too Many Requests",
+						"data":   "Rate limit exceeded",
+					})
+					return
 
-			// 	}
-			// }
+				}
+			}
 
 			h.ServeHTTP(writer, request)
 		})
