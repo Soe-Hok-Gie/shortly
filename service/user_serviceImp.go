@@ -17,15 +17,15 @@ type userServiceImp struct {
 	UserRepository repository.UserRepository
 }
 
-func (service *userServiceImp) Save(ctx context.Context, input dto.CreateUserInput) (domain.User, error) {
+func (service *userServiceImp) Save(ctx context.Context, input dto.CreateUserInput) (dto.UserResponse, error) {
 
 	if input.Username == "" || input.Password == "" {
-		return domain.User{}, errors.New("Username & Password not requaired")
+		return dto.UserResponse{}, errors.New("Username & Password not requaired")
 	}
 	//hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return domain.User{}, fmt.Errorf("failed to hash password: %w", err)
+		return dto.UserResponse{}, fmt.Errorf("failed to hash password: %w", err)
 	}
 
 	user := domain.User{
@@ -33,5 +33,16 @@ func (service *userServiceImp) Save(ctx context.Context, input dto.CreateUserInp
 		Password:  string(hashedPassword),
 		CreatedAt: time.Now(),
 	}
+	// Simpan ke repository
+	user, err = service.UserRepository.Save(ctx, user)
+	if err != nil {
+		return dto.UserResponse{}, fmt.Errorf("gagal menyimpan user: %w", err)
+	}
+
+	userResponse := dto.UserResponse{
+		Username:   user.Username,
+		Created_At: user.CreatedAt,
+	}
+	return userResponse, nil
 
 }
