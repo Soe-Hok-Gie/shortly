@@ -7,6 +7,8 @@ import (
 	"shortly/model/domain"
 	"shortly/model/dto"
 	"shortly/repository"
+	"strings"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -25,4 +27,11 @@ func (service *userServiceImp) Save(ctx context.Context, input dto.CreateUserInp
 	if err != nil {
 		return domain.User{}, fmt.Errorf("failed to hash password: %w", err)
 	}
+
+	user := domain.User{
+		Username:  strings.ToLower(input.Username),
+		Password:  string(hashedPassword),
+		CreatedAt: time.Now(),
+	}
+
 }
