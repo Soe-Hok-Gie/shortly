@@ -17,6 +17,10 @@ type userServiceImp struct {
 	UserRepository repository.UserRepository
 }
 
+func NewUserService(userRepository repository.UserRepository) UserService {
+	return &userServiceImp{UserRepository: userRepository}
+}
+
 func (service *userServiceImp) Save(ctx context.Context, input dto.CreateUserInput) (dto.UserResponse, error) {
 
 	if input.Username == "" || input.Password == "" {
