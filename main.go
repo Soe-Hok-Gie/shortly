@@ -33,10 +33,15 @@ func main() {
 
 	//setDB
 	db := app.NewDB(userDB, passDB, hostDB, portDB, nameDB)
-
+	//url
 	urlRepository := repository.NewUrlRepository(db)
 	urlService := service.NewUrlService(urlRepository)
 	urlController := controller.NewUrlController(urlService)
+
+	//user
+	userRepository := repository.NewUserRepository(db)
+	userService := service.NewUserService(userRepository)
+	userController := controller.NewUserController(userService)
 
 	r := mux.NewRouter()
 	r.HandleFunc("/url", urlController.Save).Methods("POST")
@@ -45,6 +50,7 @@ func main() {
 	// r.HandleFunc("/{code}", urlController.RedirectAndIncrement).Methods("GET")//sebelum ada middleware
 	r.Handle("/code/{code}", rateLimitMiddleware.WithRateLimit()(http.HandlerFunc(urlController.RedirectAndIncrement)))
 	r.Handle("/topvisited", rateLimitMiddleware.WithRateLimit()(http.HandlerFunc(urlController.GetTopVisited)))
+	r.HandleFunc("/user/register", userController.Save).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8080", r))
 
 }
