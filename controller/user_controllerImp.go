@@ -55,9 +55,20 @@ func (controller *userControllerImp) Save(writer http.ResponseWriter, request *h
 	})
 }
 
-//login
-
+// login
 func (controller *userControllerImp) Login(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
+	var input dto.CreateUserInput
+
+	if err := json.NewDecoder(request.Body).Decode(&input); err != nil {
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(writer).Encode(dto.Response{
+			Code:   http.StatusBadRequest,
+			Status: "Bad Request",
+			Data:   "Input salah",
+		})
+		return
+	}
 
 }
