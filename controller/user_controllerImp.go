@@ -54,3 +54,10 @@ func (controller *userControllerImp) Save(writer http.ResponseWriter, request *h
 		Data:   result,
 	})
 }
+
+//login
+
+func (controller *userControllerImp) Login(writer http.ResponseWriter, request *http.Request) {
+	ctx := request.Context()
+
+}
