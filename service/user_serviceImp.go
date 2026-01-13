@@ -51,6 +51,16 @@ func (service *userServiceImp) Save(ctx context.Context, input dto.CreateUserInp
 
 }
 
+// error global yang dipakai setiap kali login gagal (username tidak ditemukan atau password salah)
+var ErrInvalidCredential = errors.New("invalid credential")
+
 func (service *userServiceImp) Login(ctx context.Context, input dto.CreateUserInput) (dto.UserResponse, error) {
+
+	var resp dto.UserResponse
+
+	user, err := service.UserRepository.Login(ctx, input.Username)
+	if err != nil {
+		return resp, ErrInvalidCredential
+	}
 
 }
