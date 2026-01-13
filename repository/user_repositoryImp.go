@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 	"shortly/model/domain"
 
 	"github.com/go-sql-driver/mysql"
@@ -42,4 +43,19 @@ func isDuplicateKeyError(err error) bool {
 		return me.Number == 1062
 	}
 	return false
+}
+
+// login
+func (repository *userRepositoryImp) Login(ctx context.Context, username string) (*domain.User, error) {
+	user := &domain.User{}
+	script := "SELECT username, password FROM user WHERE username = ?"
+	row := repository.DB.QueryRowContext(ctx, script, username)
+
+	err := row.Scan(&user.Username, &user.Password)
+	if err != nil {
+		log.Println("user not found:", err)
+		return nil, err
+	}
+	return user, nil
+
 }
