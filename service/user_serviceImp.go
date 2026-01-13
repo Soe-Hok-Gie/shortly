@@ -56,15 +56,19 @@ var ErrInvalidCredential = errors.New("invalid credential")
 
 func (service *userServiceImp) Login(ctx context.Context, input dto.CreateUserInput) (dto.UserResponse, error) {
 
-	var resp dto.UserResponse
+	var userResponse dto.UserResponse
 
 	user, err := service.UserRepository.Login(ctx, input.Username)
 	if err != nil {
-		return resp, ErrInvalidCredential
+		return userResponse, ErrInvalidCredential
 	}
 
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)) != nil {
-		return resp, ErrInvalidCredential
+		return userResponse, ErrInvalidCredential
 	}
 
+	userResponse = dto.UserResponse{
+		Username: user.Username,
+	}
+	return userResponse, nil
 }
