@@ -63,4 +63,8 @@ func (service *userServiceImp) Login(ctx context.Context, input dto.CreateUserIn
 		return resp, ErrInvalidCredential
 	}
 
+	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)) != nil {
+		return resp, ErrInvalidCredential
+	}
+
 }
