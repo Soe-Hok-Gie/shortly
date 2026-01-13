@@ -50,3 +50,7 @@ func (service *userServiceImp) Save(ctx context.Context, input dto.CreateUserInp
 	return userResponse, nil
 
 }
+
+func (service *userServiceImp) Login(ctx context.Context, input dto.CreateUserInput) (dto.UserResponse, error) {
+
+}
