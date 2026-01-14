@@ -28,6 +28,8 @@ func (service *userServiceImp) Save(ctx context.Context, input dto.CreateUserInp
 	}
 	//hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	input.Password = string(hashedPassword)
+
 	if err != nil {
 		return dto.UserResponse{}, fmt.Errorf("failed to hash password: %w", err)
 	}
@@ -64,6 +66,7 @@ func (service *userServiceImp) Login(ctx context.Context, input dto.CreateUserIn
 	}
 
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)) != nil {
+		fmt.Println("Password mismatch!")
 		return userResponse, ErrInvalidCredential
 	}
 
