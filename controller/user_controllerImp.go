@@ -71,4 +71,34 @@ func (controller *userControllerImp) Login(writer http.ResponseWriter, request *
 		return
 	}
 
+	userResponse, err := controller.userService.Login(ctx, input)
+	if err != nil {
+		writer.Header().Set("Content-Type", "application/json")
+		//errorcredensial
+		if err == service.ErrInvalidCredential {
+			writer.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(writer).Encode(dto.Response{
+				Code:   http.StatusUnauthorized,
+				Status: "unauthorize",
+				Data:   "Username or password failed",
+			})
+			return
+		}
+
+		//internal server error
+		writer.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(writer).Encode(dto.Response{
+			Code:   http.StatusInternalServerError,
+			Status: "internal server error",
+			Data:   err.Error(),
+		})
+		return
+	}
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
+	json.NewEncoder(writer).Encode(dto.Response{
+		Code:   http.StatusOK,
+		Status: "Success",
+		Data:   userResponse,
+	})
 }
