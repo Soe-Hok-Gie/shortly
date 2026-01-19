@@ -18,7 +18,7 @@ func NewUserRepository(DB *sql.DB) UserRepository {
 	return &userRepositoryImp{DB: DB}
 }
 
-func (repository *userRepositoryImp) Save(ctx context.Context, user domain.User) (domain.User, error) {
+func (repository *userRepositoryImp) Register(ctx context.Context, user domain.User) (domain.User, error) {
 	script := "INSERT INTO users (username,password) VALUES (?,?)"
 	result, err := repository.DB.ExecContext(ctx, script, user.Username, user.Password)
 	if err != nil {

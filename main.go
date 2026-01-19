@@ -50,7 +50,7 @@ func main() {
 	// r.HandleFunc("/{code}", urlController.RedirectAndIncrement).Methods("GET")//sebelum ada middleware
 	r.Handle("/code/{code}", rateLimitMiddleware.WithRateLimit()(http.HandlerFunc(urlController.RedirectAndIncrement)))
 	r.Handle("/topvisited", rateLimitMiddleware.WithRateLimit()(http.HandlerFunc(urlController.GetTopVisited)))
-	r.HandleFunc("/auth/register", userController.Save).Methods("POST")
+	r.HandleFunc("/auth/register", userController.Register).Methods("POST")
 	r.HandleFunc("/auth/login", userController.Login).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8080", r))
 

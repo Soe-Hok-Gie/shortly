@@ -15,7 +15,7 @@ func NewUserController(userService service.UserService) userController {
 	return &userControllerImp{userService: userService}
 }
 
-func (controller *userControllerImp) Save(writer http.ResponseWriter, request *http.Request) {
+func (controller *userControllerImp) Register(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 
 	var req dto.CreateUserInput
@@ -30,7 +30,7 @@ func (controller *userControllerImp) Save(writer http.ResponseWriter, request *h
 		return
 	}
 
-	result, err := controller.userService.Save(ctx, req)
+	result, err := controller.userService.Register(ctx, req)
 	if err != nil {
 		status := http.StatusBadRequest
 		if err.Error() == "username already exists" {

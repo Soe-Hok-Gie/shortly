@@ -21,7 +21,7 @@ func NewUserService(userRepository repository.UserRepository) UserService {
 	return &userServiceImp{UserRepository: userRepository}
 }
 
-func (service *userServiceImp) Save(ctx context.Context, input dto.CreateUserInput) (dto.UserResponse, error) {
+func (service *userServiceImp) Register(ctx context.Context, input dto.CreateUserInput) (dto.UserResponse, error) {
 
 	if input.Username == "" || input.Password == "" {
 		return dto.UserResponse{}, errors.New("Username & Password not requaired")
@@ -40,7 +40,7 @@ func (service *userServiceImp) Save(ctx context.Context, input dto.CreateUserInp
 		CreatedAt: time.Now(),
 	}
 	// Simpan ke repository
-	user, err = service.UserRepository.Save(ctx, user)
+	user, err = service.UserRepository.Register(ctx, user)
 	if err != nil {
 		return dto.UserResponse{}, fmt.Errorf("gagal menyimpan user: %w", err)
 	}

@@ -6,6 +6,6 @@ import (
 )
 
 type UserService interface {
-	Save(ctx context.Context, input dto.CreateUserInput) (dto.UserResponse, error)
+	Register(ctx context.Context, input dto.CreateUserInput) (dto.UserResponse, error)
 	Login(ctx context.Context, input dto.CreateUserInput) (dto.UserResponse, error)
 }
