@@ -33,12 +33,12 @@ func (controller *userControllerImp) Register(writer http.ResponseWriter, reques
 
 	result, err := controller.userService.Register(ctx, req)
 	if err != nil {
+		writer.Header().Set("Content-Type", "application/json")
 		status := http.StatusConflict
 		if err.Error() == "username already exists" {
 			status = http.StatusConflict
 		}
 		log.Println("username already exists")
-
 		writer.WriteHeader(status)
 		json.NewEncoder(writer).Encode(dto.Response{
 			Code:   status,
