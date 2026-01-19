@@ -7,7 +7,6 @@ import (
 	"shortly/model/domain"
 	"shortly/model/dto"
 	"shortly/repository"
-	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -35,14 +34,14 @@ func (service *userServiceImp) Register(ctx context.Context, input dto.CreateUse
 	}
 
 	user := domain.User{
-		Username:  strings.ToLower(input.Username),
+		Username:  string(input.Username),
 		Password:  string(hashedPassword),
 		CreatedAt: time.Now(),
 	}
 	// Simpan ke repository
 	user, err = service.UserRepository.Register(ctx, user)
 	if err != nil {
-		return dto.UserResponse{}, fmt.Errorf("gagal menyimpan user: %w", err)
+		return dto.UserResponse{}, fmt.Errorf("failed save user: %w", err)
 	}
 
 	userResponse := dto.UserResponse{
