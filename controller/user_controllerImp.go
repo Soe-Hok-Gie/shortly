@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"shortly/model/dto"
 	"shortly/service"
@@ -33,17 +32,12 @@ func (controller *userControllerImp) Register(writer http.ResponseWriter, reques
 
 	result, err := controller.userService.Register(ctx, req)
 	if err != nil {
-		writer.Header().Set("Content-Type", "application/json")
-		status := http.StatusConflict
-		if err.Error() == "username already exists" {
-			status = http.StatusConflict
-		}
-		log.Println("username already exists")
-		writer.WriteHeader(status)
+		writer.Header().Set("content-type", "application/json")
+		writer.WriteHeader(http.StatusConflict)
 		json.NewEncoder(writer).Encode(dto.Response{
-			Code:   status,
-			Status: http.StatusText(status),
-			Data:   err.Error(),
+			Code:   http.StatusConflict,
+			Status: http.StatusText(http.StatusConflict),
+			Data:   "username already exists",
 		})
 		return
 
