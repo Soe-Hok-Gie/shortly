@@ -100,7 +100,7 @@ func (controller *userControllerImp) Login(writer http.ResponseWriter, request *
 		json.NewEncoder(writer).Encode(dto.Response{
 			Code:   http.StatusInternalServerError,
 			Status: "internal server error",
-			Data:   "server",
+			Data:   "server error",
 		})
 		return
 	}
