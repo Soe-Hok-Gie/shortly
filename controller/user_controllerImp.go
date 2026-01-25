@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"shortly/model/dto"
 	"shortly/service"
@@ -32,22 +33,34 @@ func (controller *userControllerImp) Register(writer http.ResponseWriter, reques
 
 	result, err := controller.userService.Register(ctx, req)
 	if err != nil {
-		writer.Header().Set("content-type", "application/json")
-		writer.WriteHeader(http.StatusConflict)
+		status := http.StatusInternalServerError
+		msg := "Internal server error"
+
+		// Mapping error ke pesan & status code
+		switch {
+		case errors.Is(err, service.ErrInvalidInput):
+			status = http.StatusBadRequest
+			msg = "Username & password are required"
+		case errors.Is(err, service.ErrUsernameExists):
+			status = http.StatusConflict
+			msg = "username already exists"
+		}
+
+		writer.WriteHeader(status)
 		json.NewEncoder(writer).Encode(dto.Response{
-			Code:   http.StatusConflict,
-			Status: http.StatusText(http.StatusConflict),
-			Data:   "username already exists",
+			Code:   status,
+			Status: http.StatusText(status),
+			Data:   msg,
 		})
 		return
-
 	}
 
+	// Success response
 	writer.Header().Set("Content-Type", "application/json")
-	writer.WriteHeader(http.StatusCreated)
+	writer.WriteHeader(http.StatusCreated) // 201
 	json.NewEncoder(writer).Encode(dto.Response{
 		Code:   http.StatusCreated,
-		Status: "Register Sukses",
+		Status: "Create",
 		Data:   result,
 	})
 }
@@ -87,10 +100,11 @@ func (controller *userControllerImp) Login(writer http.ResponseWriter, request *
 		json.NewEncoder(writer).Encode(dto.Response{
 			Code:   http.StatusInternalServerError,
 			Status: "internal server error",
-			Data:   err.Error(),
+			Data:   "server",
 		})
 		return
 	}
+
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusOK)
 	json.NewEncoder(writer).Encode(dto.Response{
