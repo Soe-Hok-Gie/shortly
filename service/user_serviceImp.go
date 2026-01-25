@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"shortly/model/domain"
 	"shortly/model/dto"
 	"shortly/repository"
@@ -20,28 +22,42 @@ func NewUserService(userRepository repository.UserRepository) UserService {
 	return &userServiceImp{UserRepository: userRepository}
 }
 
+var (
+	// error global yang dipakai setiap kali register gagal (username & password are required)
+	ErrInvalidInput = errors.New("username & password are required")
+
+	// error global yang dipakai setiap kali register gagal (username duplikat)
+	ErrUsernameExists = errors.New("username already exists")
+
+	// error global yang dipakai setiap kali login gagal (username tidak ditemukan atau password salah)
+	ErrInvalidCredential = errors.New("invalid credential")
+
+	ErrInternal = errors.New("internal server error")
+)
+
 func (service *userServiceImp) Register(ctx context.Context, input dto.CreateUserInput) (dto.UserResponse, error) {
 
 	if input.Username == "" || input.Password == "" {
-		return dto.UserResponse{}, errors.New("Username & Password not requaired")
+		return dto.UserResponse{}, ErrInvalidInput
 	}
 	//hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
-	input.Password = string(hashedPassword)
 
 	if err != nil {
 		return dto.UserResponse{}, fmt.Errorf("failed to hash password: %w", err)
 	}
 
 	user := domain.User{
-		Username:  string(input.Username),
+		Username:  input.Username,
 		Password:  string(hashedPassword),
 		CreatedAt: time.Now(),
 	}
 	// Simpan ke repository
 	user, err = service.UserRepository.Register(ctx, user)
 	if err != nil {
-		return dto.UserResponse{}, fmt.Errorf("failed save user: %w", err)
+		if repository.IsDuplicateKeyError(err) {
+			return dto.UserResponse{}, ErrUsernameExists
+		}
 	}
 
 	userResponse := dto.UserResponse{
@@ -52,16 +68,18 @@ func (service *userServiceImp) Register(ctx context.Context, input dto.CreateUse
 
 }
 
-// error global yang dipakai setiap kali login gagal (username tidak ditemukan atau password salah)
-var ErrInvalidCredential = errors.New("invalid credential")
-
 func (service *userServiceImp) Login(ctx context.Context, input dto.CreateUserInput) (dto.UserResponse, error) {
 
 	var userResponse dto.UserResponse
 
 	user, err := service.UserRepository.Login(ctx, input.Username)
 	if err != nil {
-		return userResponse, ErrInvalidCredential
+		if err == sql.ErrNoRows {
+			log.Printf("user not found: username=%s, dbErr=%v", input.Username, err)
+			return dto.UserResponse{}, ErrInvalidCredential
+		}
+		return dto.UserResponse{}, ErrInternal
+
 	}
 
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)) != nil {
