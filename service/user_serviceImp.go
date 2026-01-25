@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"shortly/model/domain"
 	"shortly/model/dto"
 	"shortly/repository"
@@ -75,7 +74,7 @@ func (service *userServiceImp) Login(ctx context.Context, input dto.CreateUserIn
 	user, err := service.UserRepository.Login(ctx, input.Username)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			log.Printf("user not found: username=%s, dbErr=%v", input.Username, err)
+			fmt.Println("username not found!")
 			return dto.UserResponse{}, ErrInvalidCredential
 		}
 		return dto.UserResponse{}, ErrInternal
