@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"log"
 	"shortly/model/domain"
 
@@ -22,8 +21,8 @@ func (repository *userRepositoryImp) Register(ctx context.Context, user domain.U
 	script := "INSERT INTO users (username,password) VALUES (?,?)"
 	result, err := repository.DB.ExecContext(ctx, script, user.Username, user.Password)
 	if err != nil {
-		if isDuplicateKeyError(err) {
-			return user, errors.New("username already exists")
+		if IsDuplicateKeyError(err) {
+			return user, err
 		}
 		return user, err
 	}
@@ -38,7 +37,7 @@ func (repository *userRepositoryImp) Register(ctx context.Context, user domain.U
 }
 
 // Helper untuk cek duplicate key MySQL
-func isDuplicateKeyError(err error) bool {
+func IsDuplicateKeyError(err error) bool {
 	if me, ok := err.(*mysql.MySQLError); ok {
 		return me.Number == 1062
 	}
