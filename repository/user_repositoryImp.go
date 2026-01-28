@@ -47,10 +47,10 @@ func IsDuplicateKeyError(err error) bool {
 // login
 func (repository *userRepositoryImp) Login(ctx context.Context, username string) (*domain.User, error) {
 	user := &domain.User{}
-	script := "SELECT username, password FROM users WHERE username = ?"
+	script := "SELECT id,username, password FROM users WHERE username = ?"
 	row := repository.DB.QueryRowContext(ctx, script, username)
 
-	err := row.Scan(&user.Username, &user.Password)
+	err := row.Scan(&user.Id, &user.Username, &user.Password)
 	if err != nil {
 		log.Println("user not found:", err)
 		return nil, err
