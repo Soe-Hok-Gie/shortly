@@ -8,6 +8,7 @@ import (
 	"shortly/model/domain"
 	"shortly/model/dto"
 	"shortly/repository"
+	"shortly/utils"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -67,27 +68,33 @@ func (service *userServiceImp) Register(ctx context.Context, input dto.CreateUse
 
 }
 
-func (service *userServiceImp) Login(ctx context.Context, input dto.CreateUserInput) (dto.UserResponse, error) {
-
-	var userResponse dto.UserResponse
+func (service *userServiceImp) Login(ctx context.Context, input dto.CreateUserInput) (dto.LoginResponse, error) {
 
 	user, err := service.UserRepository.Login(ctx, input.Username)
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			fmt.Println("username not found!")
-			return dto.UserResponse{}, ErrInvalidCredential
+			return dto.LoginResponse{}, ErrInvalidCredential
 		}
-		return dto.UserResponse{}, ErrInternal
+		return dto.LoginResponse{}, ErrInternal
 
 	}
+	fmt.Println("user.Id:", user.Id) // pastikan bukan 0
 
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)) != nil {
 		fmt.Println("Password mismatch!")
-		return userResponse, ErrInvalidCredential
+		return dto.LoginResponse{}, ErrInvalidCredential
 	}
 
-	userResponse = dto.UserResponse{
-		Username: user.Username,
+	token, err := utils.GenerateToken(user.Id, user.Username)
+	fmt.Println("JWT:", token)
+
+	if err != nil {
+		return dto.LoginResponse{}, err
 	}
-	return userResponse, nil
+	return dto.LoginResponse{
+		AccessToken: token,
+		TokenType:   "JWT",
+	}, nil
 }
