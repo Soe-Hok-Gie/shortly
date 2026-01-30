@@ -11,7 +11,7 @@ import (
 )
 
 func GenerateToken(Id int64) (string, error) {
-	fmt.Println("DEBUG user.Id:", Id)
+	fmt.Println("user.Id:", Id)
 
 	secret := []byte(os.Getenv("JWT_SECRET"))
 	if len(secret) == 0 {

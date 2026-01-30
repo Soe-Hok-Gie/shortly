@@ -80,15 +80,12 @@ func (service *userServiceImp) Login(ctx context.Context, input dto.CreateUserIn
 		return dto.LoginResponse{}, ErrInternal
 
 	}
-	fmt.Println("user.Id:", user.Id) // pastikan bukan 0
-
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)) != nil {
 		fmt.Println("Password mismatch!")
 		return dto.LoginResponse{}, ErrInvalidCredential
 	}
 
 	token, err := utils.GenerateToken(user.Id)
-	fmt.Println("JWT:", token)
 
 	if err != nil {
 		return dto.LoginResponse{}, err
