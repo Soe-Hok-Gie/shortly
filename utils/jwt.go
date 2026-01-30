@@ -10,7 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateToken(Id int64, username string) (string, error) {
+func GenerateToken(Id int64) (string, error) {
 	fmt.Println("DEBUG user.Id:", Id)
 
 	secret := []byte(os.Getenv("JWT_SECRET"))

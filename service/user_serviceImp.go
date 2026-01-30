@@ -87,7 +87,7 @@ func (service *userServiceImp) Login(ctx context.Context, input dto.CreateUserIn
 		return dto.LoginResponse{}, ErrInvalidCredential
 	}
 
-	token, err := utils.GenerateToken(user.Id, user.Username)
+	token, err := utils.GenerateToken(user.Id)
 	fmt.Println("JWT:", token)
 
 	if err != nil {
