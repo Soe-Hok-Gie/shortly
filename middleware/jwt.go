@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -59,4 +60,7 @@ func validateToken(tokenStr string) (int64, error) {
 		return 0, errors.New("invalid token")
 	}
 
+	if claims.ExpiresAt.Time.Before(time.Now()) {
+		return 0, errors.New("token expired")
+	}
 }
