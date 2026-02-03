@@ -1,12 +1,12 @@
 package middleware
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -37,6 +37,8 @@ func JWTMiddleware(next http.Handler) http.Handler {
 			http.Error(writer, err.Error(), http.StatusUnauthorized)
 			return
 		}
+		ctx := context.WithValue(request.Context(), UserIdKey, Id)
+		next.ServeHTTP(writer, request.WithContext(ctx))
 
 	})
 }
@@ -59,10 +61,6 @@ func validateToken(tokenStr string) (int64, error) {
 	claims, ok := token.Claims.(*jwt.RegisteredClaims)
 	if !ok || !token.Valid {
 		return 0, errors.New("invalid token")
-	}
-
-	if claims.ExpiresAt.Time.Before(time.Now()) {
-		return 0, errors.New("token expired")
 	}
 
 	Id, err := strconv.ParseInt(claims.Subject, 10, 64)
