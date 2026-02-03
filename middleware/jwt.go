@@ -24,5 +24,7 @@ func JWTMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
+		jwtToken := tokenParts[1]
+
 	})
 }
