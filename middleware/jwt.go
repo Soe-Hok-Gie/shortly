@@ -26,5 +26,11 @@ func JWTMiddleware(next http.Handler) http.Handler {
 
 		jwtToken := tokenParts[1]
 
+		Id, err := validateToken(jwtToken)
+		if err != nil {
+			http.Error(writer, err.Errorf(), http.StatusUnauthorized)
+			return
+		}
+
 	})
 }
