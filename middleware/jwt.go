@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -55,7 +56,7 @@ func validateToken(tokenStr string) (int64, error) {
 		return 0, err
 	}
 
-	claims, ok := token.claims(*jwt.RegisteredClaims)
+	claims, ok := token.Claims.(*jwt.RegisteredClaims)
 	if !ok || !token.Valid {
 		return 0, errors.New("invalid token")
 	}
@@ -64,4 +65,9 @@ func validateToken(tokenStr string) (int64, error) {
 		return 0, errors.New("token expired")
 	}
 
+	Id, err := strconv.ParseInt(claims.Subject, 10, 64)
+	if err != nil {
+		return 0, errors.New("invalid subject in token")
+	}
+	return Id, nil
 }
