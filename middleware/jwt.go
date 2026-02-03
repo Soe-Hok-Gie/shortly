@@ -1,7 +1,9 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -28,9 +30,16 @@ func JWTMiddleware(next http.Handler) http.Handler {
 
 		Id, err := validateToken(jwtToken)
 		if err != nil {
-			http.Error(writer, err.Errorf(), http.StatusUnauthorized)
+			http.Error(writer, err.Error(), http.StatusUnauthorized)
 			return
 		}
 
 	})
+}
+
+func validateToken(tokenStr string) (int64, error) {
+	secret := []byte(os.Getenv("JWT_SECRET"))
+	if len(secret) == 0 {
+		return 0, errors.New("JWT_SECRET is empty")
+	}
 }
