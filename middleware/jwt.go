@@ -54,4 +54,9 @@ func validateToken(tokenStr string) (int64, error) {
 		return 0, err
 	}
 
+	claims, ok := token.claims(*jwt.RegisteredClaims)
+	if !ok || !token.Valid {
+		return 0, errors.New("invalid token")
+	}
+
 }
