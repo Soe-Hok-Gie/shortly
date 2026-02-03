@@ -45,7 +45,7 @@ func validateToken(tokenStr string) (int64, error) {
 	if len(secret) == 0 {
 		return 0, errors.New("JWT_SECRET is empty")
 	}
-	token, err := JWTParsWithClaims(tokenStr, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
 		}
@@ -63,4 +63,5 @@ func validateToken(tokenStr string) (int64, error) {
 	if claims.ExpiresAt.Time.Before(time.Now()) {
 		return 0, errors.New("token expired")
 	}
+
 }
