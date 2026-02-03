@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type contextKey string
@@ -42,4 +44,14 @@ func validateToken(tokenStr string) (int64, error) {
 	if len(secret) == 0 {
 		return 0, errors.New("JWT_SECRET is empty")
 	}
+	token, err := JWTParsWithClaims(tokenStr, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return secret, nil
+	})
+	if err != nil {
+		return 0, err
+	}
+
 }
