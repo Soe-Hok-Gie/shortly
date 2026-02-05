@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"shortly/middleware"
 	"shortly/model/dto"
 	"shortly/service"
+	"strconv"
 )
 
 type userControllerImp struct {
@@ -112,4 +114,10 @@ func (controller *userControllerImp) Login(writer http.ResponseWriter, request *
 		Status: "Success",
 		Data:   userResponse,
 	})
+}
+
+// profile
+func (controller *userControllerImp) Profile(writer http.ResponseWriter, request *http.Request) {
+	Id := request.Context().Value(middleware.UserIdKey).(int64)
+	writer.Write([]byte("Hello user " + strconv.FormatInt(Id, 10)))
 }
