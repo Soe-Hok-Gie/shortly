@@ -50,8 +50,14 @@ func main() {
 	// r.HandleFunc("/{code}", urlController.RedirectAndIncrement).Methods("GET")//sebelum ada middleware
 	r.Handle("/code/{code}", rateLimitMiddleware.WithRateLimit()(http.HandlerFunc(urlController.RedirectAndIncrement)))
 	r.Handle("/topvisited", rateLimitMiddleware.WithRateLimit()(http.HandlerFunc(urlController.GetTopVisited)))
+
 	r.HandleFunc("/auth/register", userController.Register).Methods("POST")
 	r.HandleFunc("/auth/login", userController.Login).Methods("POST")
+	//proteksi dengan jwt
+	// r.Handle("/profile", middleware.JWTMiddleware(http.HandlerFunc(userController.Profile))).Methods("GET")
+	jwtMiddleware := middleware.JWTMiddleware()
+	r.Handle("/profile", jwtMiddleware(http.HandlerFunc(userController.Profile))).Methods("GET")
+
 	log.Fatal(http.ListenAndServe(":8080", r))
 
 }
