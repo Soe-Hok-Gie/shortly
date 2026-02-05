@@ -24,48 +24,59 @@ func JWTMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		tokenParts := strings.Split(authHeader, "")
-		if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
-			http.Error(writer, "nvalid authorization format", http.StatusUnauthorized)
+		// tokenParts := strings.Split(authHeader, " ")
+		// if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
+		// 	http.Error(writer, "nvalid authorization format", http.StatusUnauthorized)
+		// 	return
+		// }
+
+		// jwtToken := tokenParts[1]
+
+		if !strings.HasPrefix(authHeader, "Bearer ") {
+			http.Error(writer, "invalid authorization format", http.StatusUnauthorized)
 			return
 		}
 
-		jwtToken := tokenParts[1]
+		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+		if tokenStr == "" {
+			http.Error(writer, "token missing", http.StatusUnauthorized)
+			return
+		}
 
-		Id, err := validateToken(jwtToken)
+		Id, err := validateToken(tokenStr)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusUnauthorized)
 			return
 		}
-		ctx := context.WithValue(request.Context(), UserIdKey, Id)
+		ctx := context.WithValue(request.Context(), UserIdKey, *Id)
 		next.ServeHTTP(writer, request.WithContext(ctx))
 
 	})
 }
 
-func validateToken(tokenStr string) (int64, error) {
-	secret := []byte(os.Getenv("JWT_SECRET"))
-	if len(secret) == 0 {
-		return 0, errors.New("JWT_SECRET is empty")
+func validateToken(tokenStr string) (*int64, error) {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		return nil, errors.New("JWT_SECRET is empty")
 	}
 	token, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
 		}
-		return secret, nil
+		return []byte(secret), nil
 	})
-	if err != nil {
-		return 0, err
+	if err != nil || !token.Valid {
+		return nil, err
 	}
 
 	claims, ok := token.Claims.(*jwt.RegisteredClaims)
 	if !ok || !token.Valid {
-		return 0, errors.New("invalid token")
+		return nil, errors.New("invalid token")
 	}
 
 	Id, err := strconv.ParseInt(claims.Subject, 10, 64)
 	if err != nil {
-		return 0, errors.New("invalid subject in token")
+		return nil, errors.New("invalid subject in token")
 	}
-	return Id, nil
+	return &Id, nil
 }
