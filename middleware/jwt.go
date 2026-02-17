@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -19,36 +18,38 @@ func JWTMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 
-			authHeader := request.Header.Get("Authorization")
-			if authHeader == "" {
-				http.Error(writer, "authorization header missing", http.StatusUnauthorized)
-				return
-			}
-
-			// tokenParts := strings.Split(authHeader, " ")
-			// if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
-			// 	http.Error(writer, "nvalid authorization format", http.StatusUnauthorized)
+			// authHeader := request.Header.Get("Authorization")
+			// if authHeader == "" {
+			// 	http.Error(writer, "authorization header missing", http.StatusUnauthorized)
 			// 	return
 			// }
 
-			// jwtToken := tokenParts[1]
+			// if !strings.HasPrefix(authHeader, "Bearer ") {
+			// 	http.Error(writer, "invalid authorization format", http.StatusUnauthorized)
+			// 	return
+			// }
 
-			if !strings.HasPrefix(authHeader, "Bearer ") {
-				http.Error(writer, "invalid authorization format", http.StatusUnauthorized)
-				return
-			}
+			// tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+			// if tokenStr == "" {
+			// 	http.Error(writer, "token missing", http.StatusUnauthorized)
+			// 	return
+			// }
 
-			tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
-			if tokenStr == "" {
-				http.Error(writer, "token missing", http.StatusUnauthorized)
-				return
-			}
+			// Id, err := validateToken(tokenStr)
+			// if err != nil {
+			// 	http.Error(writer, err.Error(), http.StatusUnauthorized)
+			// 	return
+			// }
 
-			Id, err := validateToken(tokenStr)
+			coockie, err := request.Cookie("token")
 			if err != nil {
-				http.Error(writer, err.Error(), http.StatusUnauthorized)
-				return
+				http.Error(writer, "unauthorized", http.StatusUnauthorized)
 			}
+			Id, err := validateToken(coockie.Value)
+			if err != nil {
+				http.Error(writer, "invalid Token", http.StatusUnauthorized)
+			}
+
 			ctx := context.WithValue(request.Context(), UserIdKey, *Id)
 			next.ServeHTTP(writer, request.WithContext(ctx))
 
