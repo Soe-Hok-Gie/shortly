@@ -106,6 +106,15 @@ func (controller *userControllerImp) Login(writer http.ResponseWriter, request *
 		return
 	}
 
+	//cookie
+	http.SetCookie(writer, &http.Cookie{
+		Name:     "token",
+		Value:    userResponse.AccessToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+	})
+
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusOK)
 	json.NewEncoder(writer).Encode(dto.Response{
