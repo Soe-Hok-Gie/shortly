@@ -44,10 +44,12 @@ func JWTMiddleware() func(http.Handler) http.Handler {
 			coockie, err := request.Cookie("token")
 			if err != nil {
 				http.Error(writer, "unauthorized", http.StatusUnauthorized)
+				return
 			}
 			Id, err := validateToken(coockie.Value)
 			if err != nil {
 				http.Error(writer, "invalid Token", http.StatusUnauthorized)
+				return
 			}
 
 			ctx := context.WithValue(request.Context(), UserIdKey, *Id)
