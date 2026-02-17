@@ -20,6 +20,7 @@ func GenerateToken(Id int64) (string, error) {
 
 	now := time.Now()
 	claims := jwt.RegisteredClaims{
+		Issuer:    "service login",
 		Subject:   strconv.FormatInt(Id, 10),
 		IssuedAt:  jwt.NewNumericDate(now),
 		ExpiresAt: jwt.NewNumericDate(now.Add(15 * time.Minute)),
