@@ -113,6 +113,7 @@ func (controller *userControllerImp) Login(writer http.ResponseWriter, request *
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   false,
+		MaxAge:   900,
 	})
 
 	writer.Header().Set("Content-Type", "application/json")
@@ -121,6 +122,24 @@ func (controller *userControllerImp) Login(writer http.ResponseWriter, request *
 		Code:   http.StatusOK,
 		Status: "Success",
 		Data:   userResponse,
+	})
+}
+
+// logout
+func (controller *userControllerImp) Logout(writer http.ResponseWriter, request *http.Request) {
+	http.SetCookie(writer, &http.Cookie{
+		Name:     "token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		MaxAge:   -1,
+	})
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
+	json.NewEncoder(writer).Encode(dto.Response{
+		Code:   http.StatusOK,
+		Status: "success",
+		Data:   "Successfully logged out",
 	})
 }
 
