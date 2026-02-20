@@ -53,6 +53,7 @@ func main() {
 
 	r.HandleFunc("/auth/register", userController.Register).Methods("POST")
 	r.HandleFunc("/auth/login", userController.Login).Methods("POST")
+	r.HandleFunc("/auth/logout", userController.Logout).Methods("POST")
 	//proteksi dengan jwt
 	jwtMiddleware := middleware.JWTMiddleware()
 	r.Handle("/auth/login/profile", jwtMiddleware(http.HandlerFunc(userController.Profile))).Methods("GET")
