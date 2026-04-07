@@ -40,7 +40,9 @@ func main() {
 
 	//user
 	userRepository := repository.NewUserRepository(db)
-	userService := service.NewUserService(userRepository)
+	refreshTokenRepository := repository.NewRefreshTokenRepository(db)
+	userService := service.NewUserService(userRepository, refreshTokenRepository)
+
 	userController := controller.NewUserController(userService)
 
 	r := mux.NewRouter()
@@ -53,6 +55,8 @@ func main() {
 
 	r.HandleFunc("/auth/register", userController.Register).Methods("POST")
 	r.HandleFunc("/auth/login", userController.Login).Methods("POST")
+	//refresh
+	r.HandleFunc("/auth/refresh", userController.Refresh).Methods("POST")
 	r.HandleFunc("/auth/logout", userController.Logout).Methods("POST")
 	//proteksi dengan jwt
 	jwtMiddleware := middleware.JWTMiddleware()
