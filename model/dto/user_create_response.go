@@ -8,6 +8,8 @@ type UserResponse struct {
 }
 
 type LoginResponse struct {
-	AccessToken string `json:"access_token"`
-	TokenType   string `json:"token_type"` // opsional, biasanya "JWT"
+	AccessToken  string `json:"access_token"`
+	TokenType    string `json:"token_type"` // opsional, biasanya "JWT"
+	RefreshToken string `json:"-"`          // jangan expose ke JSON
+
 }
