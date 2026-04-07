@@ -3,10 +3,13 @@ package controller
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"log"
 	"net/http"
 	"shortly/middleware"
 	"shortly/model/dto"
 	"shortly/service"
+	"shortly/utils"
 )
 
 type userControllerImp struct {
@@ -103,13 +106,17 @@ func (controller *userControllerImp) Login(writer http.ResponseWriter, request *
 			Status: "internal server error",
 			Data:   "server error",
 		})
+		fmt.Println("pap ma", err)
 		return
 	}
 
 	//cookie
 	http.SetCookie(writer, &http.Cookie{
-		Name:     "token",
-		Value:    userResponse.AccessToken,
+		//tanpa refresh
+		// Name:     "token",
+		// Value:    userResponse.AccessToken,
+		Name:     "refresh_token",
+		Value:    userResponse.RefreshToken,
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   false,
@@ -121,14 +128,67 @@ func (controller *userControllerImp) Login(writer http.ResponseWriter, request *
 	json.NewEncoder(writer).Encode(dto.Response{
 		Code:   http.StatusOK,
 		Status: "Success",
-		Data:   userResponse,
+		//tanpa refresh token
+		// Data:   userResponse,
+		Data: userResponse.AccessToken,
 	})
+}
+
+func (controller *userControllerImp) Refresh(writer http.ResponseWriter, request *http.Request) {
+
+	cookie, err := request.Cookie("refresh_token")
+	if err != nil {
+		http.Error(writer, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	userResponse, err := controller.userService.Refresh(request.Context(), cookie.Value)
+	fmt.Println("refresh token received:", userResponse.RefreshToken)
+
+	if err != nil {
+		fmt.Println("refresh error:", err)
+
+		http.Error(writer, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	if userResponse.RefreshToken != "" {
+		http.SetCookie(writer, &http.Cookie{
+			Name:     "refresh_token",
+			Value:    userResponse.RefreshToken,
+			HttpOnly: true,
+			Path:     "/",
+			MaxAge:   7 * 24 * 60 * 60,
+		})
+
+		json.NewEncoder(writer).Encode(map[string]string{
+			"access_token": userResponse.AccessToken,
+		})
+	}
 }
 
 // logout
 func (controller *userControllerImp) Logout(writer http.ResponseWriter, request *http.Request) {
+
+	cookie, err := request.Cookie("refresh_token")
+	if err != nil {
+		log.Println("cookie refresh_token tidak ada")
+		return
+	}
+	refreshToken := cookie.Value
+	log.Println("refresh token:", refreshToken)
+
+	//hashed
+	hashed := utils.Hashrefresh(refreshToken)
+	//delete token di DB
+	log.Println("before delete refresh")
+
+	err = controller.userService.DeleteRefresh(request.Context(), hashed)
+	log.Println("after delete refresh")
+	if err != nil {
+		log.Println("delete", err)
+	}
+
 	http.SetCookie(writer, &http.Cookie{
-		Name:     "token",
+		Name:     "refresh_token",
 		Value:    "",
 		Path:     "/",
 		HttpOnly: true,

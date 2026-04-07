@@ -7,4 +7,5 @@ type userController interface {
 	Login(writer http.ResponseWriter, request *http.Request)
 	Logout(writer http.ResponseWriter, request *http.Request)
 	Profile(writer http.ResponseWriter, request *http.Request)
+	Refresh(writer http.ResponseWriter, request *http.Request)
 }
