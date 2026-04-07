@@ -15,11 +15,17 @@ import (
 )
 
 type userServiceImp struct {
-	UserRepository repository.UserRepository
+	UserRepository         repository.UserRepository
+	refreshTokenRepository repository.RefreshTokenRepository
 }
 
-func NewUserService(userRepository repository.UserRepository) UserService {
-	return &userServiceImp{UserRepository: userRepository}
+func NewUserService(
+	userRepository repository.UserRepository,
+	refreshTokenRepository repository.RefreshTokenRepository,
+) UserService {
+	return &userServiceImp{UserRepository: userRepository,
+		refreshTokenRepository: refreshTokenRepository,
+	}
 }
 
 var (
@@ -86,12 +92,60 @@ func (service *userServiceImp) Login(ctx context.Context, input dto.CreateUserIn
 	}
 
 	token, err := utils.GenerateToken(user.Id)
+	if err != nil {
+		return dto.LoginResponse{}, err
+	}
+
+	tokenrefresh, err := utils.GenerateRefreshToken(user.Id)
 
 	if err != nil {
 		return dto.LoginResponse{}, err
 	}
+
+	//hash sebelum save db
+	hashed := utils.Hashrefresh(tokenrefresh)
+	err = service.refreshTokenRepository.Save(ctx, &domain.RefreshToken{
+		UserID:    user.Id,
+		TokenHash: hashed,
+		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
+	})
+
+	if err != nil {
+		return dto.LoginResponse{}, err
+	}
+
 	return dto.LoginResponse{
-		AccessToken: token,
-		TokenType:   "JWT",
+		AccessToken:  token,
+		TokenType:    "JWT",
+		RefreshToken: tokenrefresh,
 	}, nil
+}
+
+func (service userServiceImp) Refresh(ctx context.Context, refreshtoken string) (dto.LoginResponse, error) {
+	hashed := utils.Hashrefresh(refreshtoken)
+
+	stored, err := service.refreshTokenRepository.FindByHash(ctx, hashed)
+	fmt.Println("stored", stored)
+	if err != nil {
+		return dto.LoginResponse{}, errors.New("refresh token invalid")
+	}
+	//cek expired
+	if time.Now().After(stored.ExpiresAt) {
+		return dto.LoginResponse{}, errors.New("refresh token by expired")
+	}
+
+	//generate accsess token baru
+	access, _ := utils.GenerateToken(stored.UserID)
+
+	// refresh token tetap sama → tidak di-rotate
+	return dto.LoginResponse{
+		AccessToken:  access,
+		RefreshToken: refreshtoken,
+	}, nil
+
+}
+
+func (service userServiceImp) DeleteRefresh(ctx context.Context, hashed string) error {
+	return service.refreshTokenRepository.DeleteByHash(ctx, hashed)
+
 }
