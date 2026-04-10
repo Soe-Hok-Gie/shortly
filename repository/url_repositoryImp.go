@@ -70,3 +70,40 @@ func (repository *urlRepositoryImp) GetTopVisited(ctx context.Context) ([]*domai
 	}
 	return result, nil
 }
+
+func (repository *urlRepositoryImp) FindURLs(ctx context.Context, Params domain.FindURLParams) ([]*domain.URL, error) {
+
+	script := "SELECT id, code, longurl,hitcount, createdat FROM urls WHERE user_id =? ORDER BY createdat DESC LIMIT ? OFFSET ?"
+
+	rows, err := repository.DB.QueryContext(
+		ctx,
+		script,
+		Params.UserID,
+		Params.Limit,
+		Params.Offset,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []*domain.URL
+	for rows.Next() {
+		url := new(domain.URL)
+		if err := rows.Scan(
+			&url.Id,
+			&url.Code,
+			&url.LongURL,
+			&url.HitCount,
+			&url.CreateAt,
+		); err != nil {
+			return nil, err
+		}
+		result = append(result, url)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
