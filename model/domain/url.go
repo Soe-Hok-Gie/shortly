@@ -9,3 +9,9 @@ type URL struct {
 	HitCount int64
 	CreateAt time.Time
 }
+
+type FindURLParams struct {
+	UserID int64
+	Limit  int
+	Offset int
+}
