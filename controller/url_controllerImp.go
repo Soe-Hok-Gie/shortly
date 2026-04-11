@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"shortly/middleware"
+	"shortly/model/domain"
 	"shortly/model/dto"
 	"shortly/service"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -118,4 +121,50 @@ func (controller *urlControllerImp) GetTopVisited(writer http.ResponseWriter, re
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusOK)
 	json.NewEncoder(writer).Encode(result)
+}
+
+func (controller *urlControllerImp) FindURLs(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Content-Type", "application/json")
+
+	query := request.URL.Query()
+	pageStr := query.Get("page")
+	limitStr := query.Get("limit")
+
+	page, _ := strconv.Atoi(pageStr)
+	limit, _ := strconv.Atoi(limitStr)
+
+	if page <= 0 {
+		page = 1
+	}
+	if limit <= 0 {
+		limit = 10
+	}
+
+	offset := (page - 1) * limit
+
+	// ambil userID dari context (middleware)
+	userIDVal := request.Context().Value(middleware.UserIdKey)
+	userID, ok := userIDVal.(int64)
+	if !ok {
+		http.Error(writer, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	params := domain.FindURLParams{
+		UserID: userID,
+		Limit:  limit,
+		Offset: offset,
+	}
+
+	res, err := controller.urlService.FindUrls(request.Context(), params)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(writer).Encode(res); err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 }
