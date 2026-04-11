@@ -11,4 +11,5 @@ type UrlService interface {
 	// Redirect(ctx context.Context, code string) (domain.URL, error)
 	RedirectAndIncrement(ctx context.Context, code string) (domain.URL, error)
 	GetTopVisited(ctx context.Context) ([]*dto.TopLinkResponse, error)
+	FindUrls(ctx context.Context, Params domain.FindURLParams) (dto.URLListResponse, error)
 }

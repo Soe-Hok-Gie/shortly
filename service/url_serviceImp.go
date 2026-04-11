@@ -76,3 +76,44 @@ func (service *urlServiceImp) GetTopVisited(ctx context.Context) ([]*dto.TopLink
 	}
 	return result, nil
 }
+
+func (service *urlServiceImp) FindUrls(ctx context.Context, Params domain.FindURLParams) (dto.URLListResponse, error) {
+	if Params.Limit <= 0 {
+		Params.Limit = 10
+	}
+	if Params.Offset <= 0 {
+		Params.Offset = 0
+	}
+
+	url, err := service.UrlRepository.FindURLs(ctx, Params)
+	if err != nil {
+		return dto.URLListResponse{}, err
+	}
+
+	total, err := service.UrlRepository.CountUrl(ctx)
+	if err != nil {
+		return dto.URLListResponse{}, err
+	}
+
+	totalPages := (total + Params.Limit - 1) / Params.Limit
+
+	data := make([]dto.URLResponse, 0, len(url))
+	for _, u := range url {
+		data = append(data, dto.URLResponse{
+			Id:        u.Id,
+			Code:      u.Code,
+			LongURL:   u.LongURL,
+			HitCount:  u.HitCount,
+			CreatedAt: u.CreateAt,
+		})
+	}
+	return dto.URLListResponse{
+		Data: data,
+		Meta: dto.Pagination{
+			Page:       (Params.Offset / Params.Limit) + 1,
+			Limit:      Params.Limit,
+			Total:      total,
+			TotalPages: totalPages,
+		},
+	}, nil
+}
