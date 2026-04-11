@@ -73,12 +73,11 @@ func (repository *urlRepositoryImp) GetTopVisited(ctx context.Context) ([]*domai
 
 func (repository *urlRepositoryImp) FindURLs(ctx context.Context, Params domain.FindURLParams) ([]*domain.URL, error) {
 
-	script := "SELECT id, code, longurl,hitcount, createdat FROM urls WHERE user_id =? ORDER BY createdat DESC LIMIT ? OFFSET ?"
+	script := "SELECT id, code, long_url,hit_count, created_at FROM urls ORDER BY created_at DESC LIMIT ? OFFSET ?"
 
 	rows, err := repository.DB.QueryContext(
 		ctx,
 		script,
-		Params.UserID,
 		Params.Limit,
 		Params.Offset,
 	)
@@ -106,4 +105,15 @@ func (repository *urlRepositoryImp) FindURLs(ctx context.Context, Params domain.
 		return nil, err
 	}
 	return result, nil
+}
+
+func (repository *urlRepositoryImp) CountUrl(ctx context.Context) (int, error) {
+	script := "SELECT COUNT(*) FROM urls"
+
+	var count int
+	err := repository.DB.QueryRowContext(ctx, script).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }

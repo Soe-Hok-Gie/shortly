@@ -11,4 +11,5 @@ type UrlRepository interface {
 	GetAndIncrementHits(ctx context.Context, code string) (domain.URL, error)
 	GetTopVisited(ctx context.Context) ([]*domain.URL, error)
 	FindURLs(ctx context.Context, Params domain.FindURLParams) ([]*domain.URL, error)
+	CountUrl(ctx context.Context) (int, error)
 }
