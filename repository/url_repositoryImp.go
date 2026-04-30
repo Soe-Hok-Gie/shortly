@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"shortly/model/domain"
 )
 
@@ -16,18 +15,16 @@ func NewUrlRepository(DB *sql.DB) UrlRepository {
 }
 
 func (repository *urlRepositoryImp) Save(ctx context.Context, url domain.URL) (domain.URL, error) {
-	script := "INSERT INTO urls (code,long_url,hit_count) VALUES (?,?,?)"
-	result, err := repository.DB.ExecContext(ctx, script, url.Code, url.LongURL, url.HitCount)
+	script := "INSERT INTO urls (code,long_url,hit_count,user_id) VALUES (?,?,?,?)"
+	result, err := repository.DB.ExecContext(ctx, script, url.Code, url.LongURL, url.HitCount, url.UserID)
 	if err != nil {
-		fmt.Println("err", err)
 		return url, err
 	}
 	id, err := result.LastInsertId()
 	if err != nil {
-		fmt.Println("err", err)
-
-		url.Id = id
+		return url, err
 	}
+	url.Id = id
 	return url, nil
 }
 
@@ -73,11 +70,12 @@ func (repository *urlRepositoryImp) GetTopVisited(ctx context.Context) ([]*domai
 
 func (repository *urlRepositoryImp) FindURLs(ctx context.Context, Params domain.FindURLParams) ([]*domain.URL, error) {
 
-	script := "SELECT id, code, long_url,hit_count, created_at FROM urls ORDER BY created_at DESC LIMIT ? OFFSET ?"
+	script := "SELECT id, code, long_url,hit_count, created_at, user_id FROM urls WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?"
 
 	rows, err := repository.DB.QueryContext(
 		ctx,
 		script,
+		Params.UserID,
 		Params.Limit,
 		Params.Offset,
 	)
@@ -96,6 +94,7 @@ func (repository *urlRepositoryImp) FindURLs(ctx context.Context, Params domain.
 			&url.LongURL,
 			&url.HitCount,
 			&url.CreateAt,
+			&url.UserID,
 		); err != nil {
 			return nil, err
 		}
