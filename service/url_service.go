@@ -7,7 +7,7 @@ import (
 )
 
 type UrlService interface {
-	Save(ctx context.Context, longURL string) (domain.URL, error)
+	Save(ctx context.Context, longURL string, UserId int64) (domain.URL, error)
 	// Redirect(ctx context.Context, code string) (domain.URL, error)
 	RedirectAndIncrement(ctx context.Context, code string) (domain.URL, error)
 	GetTopVisited(ctx context.Context) ([]*dto.TopLinkResponse, error)

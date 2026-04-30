@@ -22,11 +22,12 @@ func NewUrlService(urlRepository repository.UrlRepository) UrlService {
 // rand.Seed() memberi nilai awal (seed) untuk generator random, supaya hasilnya berbeda setiap kali program dijalankan.
 // Diletakkan di init() → otomatis dijalankan sebelum main()
 
-func (service *urlServiceImp) Save(ctx context.Context, longURL string) (domain.URL, error) {
+func (service *urlServiceImp) Save(ctx context.Context, longURL string, UserId int64) (domain.URL, error) {
 	url := domain.URL{
 		Code:     generateShortCode(6),
 		LongURL:  longURL,
 		HitCount: 0,
+		UserID:   UserId,
 	}
 
 	url, err := service.UrlRepository.Save(ctx, url)
