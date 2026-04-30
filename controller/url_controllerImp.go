@@ -37,7 +37,15 @@ func (controller *urlControllerImp) Save(writer http.ResponseWriter, request *ht
 		return
 	}
 
-	url, err := controller.urlService.Save(ctx, req.LongURL)
+	// ambil userID dari context (middleware)
+	userIDVal := request.Context().Value(middleware.UserIdKey)
+	userID, ok := userIDVal.(int64)
+	if !ok {
+		http.Error(writer, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	url, err := controller.urlService.Save(ctx, req.LongURL, userID)
 	if err != nil {
 		writer.Header().Set("Content-Type", "application/json")
 		writer.WriteHeader(http.StatusInternalServerError)
