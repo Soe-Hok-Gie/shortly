@@ -8,6 +8,7 @@ type URL struct {
 	LongURL  string
 	HitCount int64
 	CreateAt time.Time
+	UserID   int64
 }
 
 type FindURLParams struct {
