@@ -46,7 +46,6 @@ func main() {
 	userController := controller.NewUserController(userService)
 
 	r := mux.NewRouter()
-	r.HandleFunc("/url", urlController.Save).Methods("POST")
 	// r.HandleFunc("/topvisited", urlController.GetTopVisited).Methods("GET")//sebelum ada middleware
 	rateLimitMiddleware := middleware.NewRateLimitMiddleware()
 	// r.HandleFunc("/{code}", urlController.RedirectAndIncrement).Methods("GET")//sebelum ada middleware
@@ -63,6 +62,7 @@ func main() {
 	jwtMiddleware := middleware.JWTMiddleware()
 	r.Handle("/auth/login/profile", jwtMiddleware(http.HandlerFunc(userController.Profile))).Methods("GET")
 	r.Handle("/auth/login/urls", jwtMiddleware(http.HandlerFunc(urlController.FindURLs))).Methods("GET")
+	r.Handle("/auth/login/url", jwtMiddleware(http.HandlerFunc(urlController.Save))).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 
